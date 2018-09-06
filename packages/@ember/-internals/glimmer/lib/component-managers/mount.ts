@@ -4,6 +4,7 @@ import { CONSTANT_TAG, Tag, VersionedPathReference } from '@glimmer/reference';
 import { ComponentDefinition, Invocation, WithDynamicLayout } from '@glimmer/runtime';
 import { Destroyable, Opaque, Option } from '@glimmer/util';
 
+import { Owner } from '@ember/-internals/owner';
 import { generateControllerFactory } from '@ember/-internals/routing';
 import { OwnedTemplateMeta } from '@ember/-internals/views';
 import { EMBER_ENGINES_MOUNT_PARAMS } from '@ember/canary-features';
@@ -14,7 +15,7 @@ import { RootReference } from '../utils/references';
 import AbstractManager from './abstract';
 
 // TODO: remove these stubbed interfaces when better typing is in place
-interface Engine {
+interface Engine extends Owner {
   boot(): void;
   destroy(): void;
   lookup(name: string): any;
