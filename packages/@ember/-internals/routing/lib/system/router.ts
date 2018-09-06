@@ -130,17 +130,18 @@ const EmberRouter = EmberObject.extend(Evented, {
 
   _buildDSL() {
     let enableLoadingSubstates = this._hasModuleBasedResolver();
-    let options = { enableLoadingSubstates };
-
     let owner = getOwner(this);
     let router = this;
-
-    options.resolveRouteMap = name => owner.factoryFor(`route-map:${name}`);
-
-    options.addRouteForEngine = (name, engineInfo) => {
-      if (!router._engineInfoByRoute[name]) {
-        router._engineInfoByRoute[name] = engineInfo;
-      }
+    let options = {
+      enableLoadingSubstates,
+      resolveRouteMap(name: string) {
+        return owner.factoryFor(`route-map:${name}`);
+      },
+      addRouteForEngine(name: string, engineInfo: any) {
+        if (!router._engineInfoByRoute[name]) {
+          router._engineInfoByRoute[name] = engineInfo;
+        }
+      },
     };
 
     return new EmberRouterDSL(null, options);

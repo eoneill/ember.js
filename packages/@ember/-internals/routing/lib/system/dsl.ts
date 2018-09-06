@@ -1,12 +1,32 @@
+import { Factory } from '@ember/-internals/owner';
 import { assert } from '@ember/debug';
 import { assign } from '@ember/polyfills';
+import { MatchCallback } from 'route-recognizer';
 
 let uuid = 0;
 
 interface DSLOptions {
   enableLoadingSubstates: boolean;
   overrideNameAssertion: boolean;
+  engineInfo?: EngineInfo;
+  resolveRouteMap(name: string): Factory<unknown>;
+  path?: string;
+}
+
+interface RouteOptions {
+  path: string;
   resetNamespace: boolean;
+}
+
+interface MountOptions {
+  as: string;
+}
+
+interface EngineInfo {
+  name: string;
+  instanceId: number;
+  mountPoint: string;
+  fullName: string;
 }
 
 class DSL {
@@ -16,24 +36,31 @@ class DSL {
   explicitIndex = false;
   options: DSLOptions;
 
-  static map(callback) {
-    let dsl = new DSL(null, {});
-    callback.call(dsl);
-    return dsl;
-  }
+  // static map(callback) {
+  //   let dsl = new DSL(null, {});
+  //   callback.call(dsl);
+  //   return dsl;
+  // }
 
-  constructor(name = null, options: DSLOptions) {
+  constructor(name: string | null = null, options: DSLOptions) {
     this.parent = name;
     this.enableLoadingSubstates = !!(options && options.enableLoadingSubstates);
     this.matches = [];
     this.options = options;
   }
 
-  route(name: string, options: DSLOptions, callback) {
+  route(name: string, callback: Function): void;
+  route(name: string, options: RouteOptions, callback: Function): void;
+  route(name: string, ...args: any[]) {
     let dummyErrorRoute = `/_unused_dummy_error_path_route_${name}/:error`;
-    if (arguments.length === 2 && typeof options === 'function') {
-      callback = options;
+    let callback;
+    let options;
+    if (args.length === 2 && typeof args[0] === 'function') {
+      callback = args[0];
       options = {};
+    } else {
+      options = args[0];
+      callback = args[1];
     }
 
     assert(
@@ -102,7 +129,7 @@ class DSL {
     this.matches.push(url, name, callback);
   }
 
-  generate() {
+  generate(): MatchCallback {
     let dslMatches = this.matches;
 
     if (!this.explicitIndex) {
@@ -116,7 +143,7 @@ class DSL {
     };
   }
 
-  mount(_name: string, options = {}) {
+  mount(_name: string, options: MountOptions = {}) {
     let engineRouteMap = this.options.resolveRouteMap(_name);
     let name = _name;
 
@@ -126,7 +153,7 @@ class DSL {
 
     let fullName = getFullName(this, name, options.resetNamespace);
 
-    let engineInfo = {
+    let engineInfo: EngineInfo = {
       name: _name,
       instanceId: uuid++,
       mountPoint: fullName,
@@ -200,7 +227,7 @@ function canNest(dsl: DSL) {
   return dsl.parent !== 'application';
 }
 
-function getFullName(dsl: DSL, name: string, resetNamespace: boolean) {
+function getFullName(dsl: DSL, name: string, resetNamespace?: boolean) {
   if (canNest(dsl) && resetNamespace !== true) {
     return `${dsl.parent}.${name}`;
   } else {
@@ -208,7 +235,7 @@ function getFullName(dsl: DSL, name: string, resetNamespace: boolean) {
   }
 }
 
-function createRoute(dsl: DSL, name: string, options = {}, callback) {
+function createRoute(dsl: DSL, name: string, options = {}, callback?: MatchCallback) {
   let fullName = getFullName(dsl, name, options.resetNamespace);
 
   if (typeof options.path !== 'string') {
