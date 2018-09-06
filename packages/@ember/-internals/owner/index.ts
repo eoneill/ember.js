@@ -26,6 +26,7 @@ export interface Owner {
   factoryFor<T, C>(fullName: string, options?: LookupOptions): Factory<T, C> | undefined;
   factoryFor(fullName: string, options?: LookupOptions): Factory<any, any> | undefined;
   buildChildEngineInstance<T>(name: string): T;
+  register<T, C>(fullName: string, factory: Factory<T, C>, options?: object): void;
   hasRegistration(name: string, options?: LookupOptions): boolean;
 }
 

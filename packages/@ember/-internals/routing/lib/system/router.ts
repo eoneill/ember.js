@@ -1,7 +1,7 @@
+import { get, set, defineProperty, computed } from '@ember/-internals/metal';
 import { getOwner } from '@ember/-internals/owner';
 import { assign } from '@ember/polyfills';
 import { cancel, once, run, scheduleOnce } from '@ember/runloop';
-import { get, set, defineProperty, computed } from '@ember/-internals/metal';
 import EmberError from '@ember/error';
 import { assert, info } from '@ember/debug';
 import { Object as EmberObject, Evented, typeOf, A as emberA } from '@ember/-internals/runtime';
@@ -545,7 +545,6 @@ const EmberRouter = EmberObject.extend(Evented, {
     this._activeQPChanged('bar', false);
       // results in _queuedQPChanges = { foo: '10', bar: false }
 
-
     _queuedQPChanges will represent both of these changes
     and the transition using `transitionTo` will be triggered
     once.
@@ -968,9 +967,9 @@ const EmberRouter = EmberObject.extend(Evented, {
       }
 
       for (let j = 0, qpLen = qpMeta.qps.length; j < qpLen; ++j) {
-        var qp = qpMeta.qps[j];
+        let qp = qpMeta.qps[j];
 
-        var presentProp =
+        let presentProp =
           (qp.prop in queryParams && qp.prop) ||
           (qp.scopedPropertyName in queryParams && qp.scopedPropertyName) ||
           (qp.urlKey in queryParams && qp.urlKey);

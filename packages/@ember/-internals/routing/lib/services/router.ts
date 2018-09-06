@@ -1,15 +1,15 @@
-import Service from '@ember/service';
 import { readOnly } from '@ember/object/computed';
-import { shallowEqual, resemblesURL, extractRouteArgs } from '../utils';
+import Service from '@ember/service';
+import { extractRouteArgs, resemblesURL, shallowEqual } from '../utils';
 
 /**
    The Router service is the public API that provides access to the router.
 
-   The immediate benefit of the Router service is that you can inject it into components, 
-   giving them a friendly way to initiate transitions and ask questions about the current 
+   The immediate benefit of the Router service is that you can inject it into components,
+   giving them a friendly way to initiate transitions and ask questions about the current
    global router state.
 
-   In this example, the Router service is injected into a component to initiate a transition 
+   In this example, the Router service is injected into a component to initiate a transition
    to a dedicated route:
    ```javascript
    import Component from '@ember/component';
@@ -32,7 +32,8 @@ import { shallowEqual, resemblesURL, extractRouteArgs } from '../utils';
    @class RouterService
    @category ember-routing-router-service
  */
-const RouterService = Service.extend({
+export default class RouterService extends Service {
+  _router: any = null;
   /**
      Name of the current route.
 
@@ -60,7 +61,7 @@ const RouterService = Service.extend({
      @type String
      @public
    */
-  currentRouteName: readOnly('_router.currentRouteName'),
+  currentRouteName = readOnly('_router.currentRouteName');
 
   /**
      Current URL for the application.
@@ -88,7 +89,7 @@ const RouterService = Service.extend({
      @type String
      @public
    */
-  currentURL: readOnly('_router.currentURL'),
+  currentURL = readOnly('_router.currentURL');
 
   /**
     The `location` property determines the type of URL's that your
@@ -104,7 +105,7 @@ const RouterService = Service.extend({
     @see {Location}
     @public
   */
-  location: readOnly('_router.location'),
+  location = readOnly('_router.location');
 
   /**
     The `rootURL` property represents the URL of the root of
@@ -133,8 +134,7 @@ const RouterService = Service.extend({
     @default '/'
     @public
   */
-  rootURL: readOnly('_router.rootURL'),
-  _router: null,
+  rootURL = readOnly('_router.rootURL');
 
   /**
      Transition the application into another route. The route may
@@ -153,7 +153,7 @@ const RouterService = Service.extend({
        attempted transition
      @public
    */
-  transitionTo(...args) {
+  transitionTo(...args: string[]) {
     if (resemblesURL(args[0])) {
       return this._router._doURLTransition('transitionTo', args[0]);
     }
@@ -164,7 +164,7 @@ const RouterService = Service.extend({
     transition._keepDefaultQueryParamValues = true;
 
     return transition;
-  },
+  }
 
   /**
      Transition into another route while replacing the current URL, if possible.
@@ -185,7 +185,7 @@ const RouterService = Service.extend({
    */
   replaceWith(/* routeNameOrUrl, ...models, options */) {
     return this.transitionTo(...arguments).method('replace');
-  },
+  }
 
   /**
      Generate a URL based on the supplied route name.
@@ -202,7 +202,7 @@ const RouterService = Service.extend({
    */
   urlFor(/* routeName, ...models, options */) {
     return this._router.generate(...arguments);
-  },
+  }
 
   /**
      Determines whether a route is active.
@@ -217,7 +217,7 @@ const RouterService = Service.extend({
      @return {boolean} true if the provided routeName/models/queryParams are active
      @public
    */
-  isActive(...args) {
+  isActive(...args: any[]) {
     let { routeName, models, queryParams } = extractRouteArgs(args);
     let routerMicrolib = this._router._routerMicrolib;
 
@@ -237,7 +237,5 @@ const RouterService = Service.extend({
     }
 
     return true;
-  },
-});
-
-export default RouterService;
+  }
+}

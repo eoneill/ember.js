@@ -12,3 +12,4 @@ export function later(...args: any[]): void;
 export function join(...args: any[]): void;
 export const backburner: IBackburner;
 export function getCurrentRunLoop(): boolean;
+export function bind(...args: any[]): any;

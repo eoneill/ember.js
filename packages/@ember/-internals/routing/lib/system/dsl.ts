@@ -1,18 +1,35 @@
-import { assign } from '@ember/polyfills';
 import { assert } from '@ember/debug';
+import { assign } from '@ember/polyfills';
 
 let uuid = 0;
 
+interface DSLOptions {
+  enableLoadingSubstates: boolean;
+  overrideNameAssertion: boolean;
+  resetNamespace: boolean;
+}
+
 class DSL {
-  constructor(name, options) {
+  parent: string | null;
+  matches: any[];
+  enableLoadingSubstates: boolean;
+  explicitIndex = false;
+  options: DSLOptions;
+
+  static map(callback) {
+    let dsl = new DSL(null, {});
+    callback.call(dsl);
+    return dsl;
+  }
+
+  constructor(name = null, options: DSLOptions) {
     this.parent = name;
-    this.enableLoadingSubstates = options && options.enableLoadingSubstates;
+    this.enableLoadingSubstates = !!(options && options.enableLoadingSubstates);
     this.matches = [];
-    this.explicitIndex = undefined;
     this.options = options;
   }
 
-  route(name, options = {}, callback) {
+  route(name: string, options: DSLOptions, callback) {
     let dummyErrorRoute = `/_unused_dummy_error_path_route_${name}/:error`;
     if (arguments.length === 2 && typeof options === 'function') {
       callback = options;
@@ -60,7 +77,7 @@ class DSL {
     }
   }
 
-  push(url, name, callback, serialize) {
+  push(url: string, name: string, callback, serialize) {
     let parts = name.split('.');
 
     if (this.options.engineInfo) {
@@ -99,7 +116,7 @@ class DSL {
     };
   }
 
-  mount(_name, options = {}) {
+  mount(_name: string, options = {}) {
     let engineRouteMap = this.options.resolveRouteMap(_name);
     let name = _name;
 
@@ -179,11 +196,11 @@ class DSL {
 
 export default DSL;
 
-function canNest(dsl) {
+function canNest(dsl: DSL) {
   return dsl.parent !== 'application';
 }
 
-function getFullName(dsl, name, resetNamespace) {
+function getFullName(dsl: DSL, name: string, resetNamespace: boolean) {
   if (canNest(dsl) && resetNamespace !== true) {
     return `${dsl.parent}.${name}`;
   } else {
@@ -191,7 +208,7 @@ function getFullName(dsl, name, resetNamespace) {
   }
 }
 
-function createRoute(dsl, name, options = {}, callback) {
+function createRoute(dsl: DSL, name: string, options = {}, callback) {
   let fullName = getFullName(dsl, name, options.resetNamespace);
 
   if (typeof options.path !== 'string') {
@@ -200,9 +217,3 @@ function createRoute(dsl, name, options = {}, callback) {
 
   dsl.push(options.path, fullName, callback, options.serialize);
 }
-
-DSL.map = callback => {
-  let dsl = new DSL();
-  callback.call(dsl);
-  return dsl;
-};

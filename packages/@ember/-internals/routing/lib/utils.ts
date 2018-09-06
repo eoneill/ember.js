@@ -1,11 +1,11 @@
+import { get } from '@ember/-internals/metal';
 import { getOwner } from '@ember/-internals/owner';
 import { assign } from '@ember/polyfills';
-import { get } from '@ember/-internals/metal';
 import EmberError from '@ember/error';
 
 const ALL_PERIODS_REGEX = /\./g;
 
-export function extractRouteArgs(args) {
+export function extractRouteArgs(args: any[]) {
   args = args.slice();
   let possibleQueryParams = args[args.length - 1];
 
@@ -58,7 +58,7 @@ export function stashParamNames(router, handlerInfos) {
   handlerInfos._namesStashed = true;
 }
 
-function _calculateCacheValuePrefix(prefix, part) {
+function _calculateCacheValuePrefix(prefix: string, part: string) {
   // calculates the dot separated sections from prefix that are also
   // at the start of part - which gives us the route name
 
@@ -85,7 +85,7 @@ function _calculateCacheValuePrefix(prefix, part) {
 /*
   Stolen from Controller
 */
-export function calculateCacheKey(prefix, parts = [], values) {
+export function calculateCacheKey(prefix: string, parts: string[] = [], values: {}) {
   let suffixes = '';
   for (let i = 0; i < parts.length; ++i) {
     let part = parts[i];
