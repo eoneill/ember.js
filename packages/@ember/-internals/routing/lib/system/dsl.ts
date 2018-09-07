@@ -9,17 +9,26 @@ interface DSLOptions {
   enableLoadingSubstates: boolean;
   overrideNameAssertion: boolean;
   engineInfo?: EngineInfo;
-  resolveRouteMap(name: string): Factory<unknown>;
+  addRouteForEngine(name: string, routeOptions: EngineRouteInfo): void;
+  resolveRouteMap(name: string): Factory<void, Function>;
   path?: string;
 }
 
+interface EngineRouteInfo extends EngineInfo {
+  localFullName: string;
+  serializeMethod?: any;
+}
+
 interface RouteOptions {
-  path: string;
-  resetNamespace: boolean;
+  path?: string;
+  resetNamespace?: boolean;
+  serialize?: any;
 }
 
 interface MountOptions {
-  as: string;
+  path?: string;
+  as?: string;
+  resetNamespace?: boolean;
 }
 
 interface EngineInfo {
@@ -49,7 +58,7 @@ class DSL {
     this.options = options;
   }
 
-  route(name: string, callback: Function): void;
+  route(name: string, callback: Function | RouteOptions): void;
   route(name: string, options: RouteOptions, callback: Function): void;
   route(name: string, ...args: any[]) {
     let dummyErrorRoute = `/_unused_dummy_error_path_route_${name}/:error`;
@@ -104,12 +113,12 @@ class DSL {
     }
   }
 
-  push(url: string, name: string, callback, serialize) {
+  push(url: string, name: string, callback?: MatchCallback, serialize?: any) {
     let parts = name.split('.');
 
     if (this.options.engineInfo) {
       let localFullName = name.slice(this.options.engineInfo.fullName.length + 1);
-      let routeInfo = assign({ localFullName }, this.options.engineInfo);
+      let routeInfo: EngineRouteInfo = assign({ localFullName }, this.options.engineInfo);
 
       if (serialize) {
         routeInfo.serializeMethod = serialize;
@@ -168,7 +177,7 @@ class DSL {
 
     let callback;
     let dummyErrorRoute = `/_unused_dummy_error_path_route_${name}/:error`;
-    if (engineRouteMap) {
+    if (engineRouteMap !== undefined && engineRouteMap.class !== undefined) {
       let shouldResetEngineInfo = false;
       let oldEngineInfo = this.options.engineInfo;
       if (oldEngineInfo) {
@@ -235,7 +244,7 @@ function getFullName(dsl: DSL, name: string, resetNamespace?: boolean) {
   }
 }
 
-function createRoute(dsl: DSL, name: string, options = {}, callback?: MatchCallback) {
+function createRoute(dsl: DSL, name: string, options: RouteOptions = {}, callback?: MatchCallback) {
   let fullName = getFullName(dsl, name, options.resetNamespace);
 
   if (typeof options.path !== 'string') {
