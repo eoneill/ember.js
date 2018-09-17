@@ -67,6 +67,7 @@ module.exports = function toES5(tree, _options) {
     ['@babel/transform-proto-to-assign'],
     injectNodeGlobals,
     ['@babel/transform-modules-amd', { noInterop: true, strict: true }],
+    ['@babel/transform-runtime', { useESModules: true }],
     enifed,
   ];
 
