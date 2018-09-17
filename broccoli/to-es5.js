@@ -11,7 +11,7 @@ const resolveModuleSource = require('amd-name-resolver').moduleResolve;
 module.exports = function toES5(tree, _options) {
   let options = Object.assign(
     {
-      environment: 'developement',
+      environment: 'development',
     },
     _options
   );
